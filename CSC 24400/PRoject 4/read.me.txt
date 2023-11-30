@@ -1,0 +1,11 @@
+Dillon Geary
+11/26
+Windows MS Visual Studio
+There are no special steps needed to compile the program
+My program has no bugs I am aware of
+I just adjusted my program with what we learned in class
+and setup some recursive function for my copy helper and to see
+if two sets are the same using ==. At first my copy helper did not work at all
+as it was causing everything else not to work tha twas returning *this
+but that was because I forgot that I needed to also link up the parents. After
+fixing this the rest seemed to tick by.

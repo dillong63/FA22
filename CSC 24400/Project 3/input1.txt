@@ -1,0 +1,4 @@
+Snickers 273 3.5 4
+PeanutMM 243 3.125 8
+Mounds 195 2 2
+MrGoodBar 257 3.333333333 6
