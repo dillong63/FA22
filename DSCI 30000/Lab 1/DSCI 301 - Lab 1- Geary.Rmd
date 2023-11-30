@@ -1,0 +1,70 @@
+---
+title: "DSCI 301 - Lab 1 - GEary"
+author: "Dillon Geary"
+date: "2022-08-29"
+output: word_document
+---
+
+
+1. Use R to find out What is three to the power of four 
+
+```{r}
+3^4
+```
+
+
+2. Create a vector called scores with the following data points: 23,27,23,21,34.
+
+```{r}
+
+scores <- c(23,27,23,21,34)
+
+scores
+```
+
+3. Assign names, for example days of the week, to the scores data points.
+
+```{r}
+names(scores) <- c("Mon", "Tue", "Wed", "Thur", "Fri")
+
+scores
+```
+
+
+4. What was the average (mean) of the above score?
+
+```{r}
+mean(scores)
+```
+
+5. What was the highest score?
+
+```{r}
+max(scores)
+```
+
+6. What was the lowest score?
+
+```{r}
+min(scores)
+```
+
+7. Create a vector called over.23 consisting of logicals that correspond to scores more than 23. 
+
+```{r}
+over.23 <- scores > 23
+
+over.23
+
+```
+
+8. Use the over.23 vector to filter out the vector and only return where the score was over 23.
+
+
+```{r}
+
+scores[over.23]
+
+```
+
+

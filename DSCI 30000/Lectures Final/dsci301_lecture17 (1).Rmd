@@ -1,0 +1,252 @@
+---
+title: "dsci301_lecture17"
+author: "Dr. Wojciech Golik"
+---
+
+
+
+
+#Primer on SIMPLE PLOTTING...
+```{r}
+
+sale5 <- c(6, 4, 9, 7, 1, 12, 8, 10, 9, 13)
+plot(1:10, sale5,    xlim=c(0, 12) ,  ylim=c(0, 15))
+
+abline(a=5, b=2, col ="red")   #plotting line y=5+2x
+abline (h=10)
+abline( v=8)
+
+
+```
+
+
+````{r}
+sale5 <- c(6, 4, 9, 7, 1, 12, 8, 10, 9, 13)
+plot(1:10, sale5,    xlim=c(0, 12) ,  ylim=c(0, 15))
+lsfit(1:10,sale5)
+abline(lsfit(1:10,sale5))
+abline(lsfit(1:10,sale5, intercept = FALSE), col= "green") # setting intercept=0
+#and changing the color of line,  color="green"
+
+```
+
+
+#SINGLE variable REGRESSION
+
+
+```{r}
+#let's use dataframes from ISLR and MASS
+library(ISLR)
+library(MASS)
+```
+
+
+```{r}
+# Fit a simple linear regression model to data from BOSTON dataframe
+head(Boston)
+
+x=   Boston$lstat
+y=   Boston$medv
+plot(x, y,    xlim=c(0, 40) ,  ylim=c(0, 50))
+abline(lsfit(x, y))
+
+
+#linear regression on data  frames (from TIDYVERSE)
+mod1 <- lm(medv ~ lstat, data = Boston)
+mod1
+
+
+```
+
+```{r}
+#plot the points  medv  vs  lstat  with the linear regression (using GGPLOT)
+library(tidyverse)  #needed  for GGPLOT
+ggplot(mod1) + 
+  geom_point(mapping = aes(x = lstat, y=medv)) + 
+  geom_smooth(aes(x = lstat, y=medv),  method = "lm")
+
+#predict  MEDV   when  lstat=30  using MOD1
+predict(mod1, data.frame( lstat=30 )   )
+
+
+
+```
+
+
+
+
+
+```{r}
+#plot the points  medv  vs  lstat  with polynomial regression (removing method = "lm") 
+library(tidyverse)
+ggplot(mod1) + 
+  geom_point(mapping = aes(x = lstat, y=medv)) + 
+  geom_smooth(aes(x = lstat, y=medv))
+
+```
+
+#Multiple Linear Regression
+
+```{r}
+mod1 <- lm(medv ~ lstat + age, data = Boston)
+mod1
+
+```
+
+```{r}
+#Get summary of mod1
+summary(mod1)
+
+```
+
+
+```{r}
+names(Boston)
+```
+
+```{r}
+#What is ~. doing?
+
+mod2 <- lm(medv ~., data = Boston)
+mod2
+summary(mod2)
+```
+
+
+
+
+Note that   lm(medv ~., data = Boston)  produced the multilinear formula
+y = y_intercept + c1*x1 + c2#x2 + c3*x3 + ...
+Now - study the p-values of mod2 produced by summary(mod2)  above...
+
+1.  When p-values for individual variables are > than ALPHA (the significance level),
+with ALPHA=ranging from 1% to 10%  then that particular variable has (statisticallY) 
+NO IMPLAT on the value of the dependent variable and should be REMOVED from further analysis.
+
+2.  Also important is the value of the parameter R-squared  (see above).  Better yet - examine the value of the Adjusted-R-squared coefficients.  It tells us how much of the variation of y is due to variation of the variables we used in our analysis..
+
+3.  But always start with examining the p-Value for the global F-test.   
+This value must be very small for the analysis to proceed...
+
+```{r}
+#Based on p-values, let's remove predictors that turned out to be not significant from the model.    
+mod3 <- lm(medv ~.-indus - age, data = Boston)
+summary(mod3)
+mod3
+
+```
+
+```{r}
+# We can also use the update function, compare both outputs (one above, one below)..
+update(mod2, ~. -indus - age)
+
+```
+
+
+#Model Diagnostics
+
+```{r}
+#Create a data frame of predictions and residuals.
+#recall that mod3 contains all variables except indus and age
+#Plot a scatterplot.
+
+
+
+
+diagnostics <- data.frame(predictions = mod3$fitted.values, residuals = mod3$residuals)
+
+
+diagnostics %>% 
+  ggplot(aes(x = predictions, y = residuals)) +
+  geom_point()
+
+#Or
+
+  ggplot(data = diagnostics, mapping = aes(x = predictions, y = residuals)) +
+  geom_point()
+
+```
+
+
+
+
+#YOUR TURN
+
+```{r}
+#Load the movies data set from canvas (download it from DATA).
+
+movies <-read.csv(file="movies.csv")
+movies
+
+
+```
+
+```{r}
+#Fit a linear model: imdb_rating as your target variable and critics_score as predictor.
+
+
+```
+
+
+
+```{r}
+#plot the scatter plot and the regression line
+
+
+```
+
+
+```{r}
+#Add audience_score as additional predictor and fit a lm.
+
+
+```
+
+
+```{r}
+#Predict the IMDb rating of a model with a critics score of 70 and audience score of 20. 
+
+
+# predict the IMDb_rating for ALL FITTED VALUES
+
+
+```
+
+
+```{r}
+#Model diagnostics: Plot predictions  versus residuals
+ 
+
+
+```
+
+
+
+
+
+
+FINALLY, let's do the model using all the variables
+```{r}
+movies <- read.csv("movies.csv")
+names(movies)
+#???
+```
+
+
+```{r}
+#Fit linear model imdb_rating using the rest of the predictors.
+
+md <- lm(imdb_rating~. , data = movies)
+summary(md)
+
+#???
+```
+
+
+
+
+
+
+
+
+

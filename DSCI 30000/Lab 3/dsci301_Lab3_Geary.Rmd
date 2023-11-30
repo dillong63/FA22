@@ -1,0 +1,43 @@
+---
+title: "DSCI 301 - Lab 3"
+author: "Put your name"
+date: "put the date here"
+output: doc_document
+---
+
+**Solve the following problems using R**
+
+**Instruction**: 
+
+* Create a new R Markdown document with File > New File > R Markdown. 
+    * title: "DSCI 301 - Lab 3"
+    * author: "Put your name"
+*   Solve the problems in Lab3
+*  After you are done, knit your RMD file into Microsoft Word
+*   
+*  Upload all 3 of your files ( .rmd,  .docx,  .csv) 
+into Canvas assignment Lab 3, before midnight
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+EXERCISE.   Lab 3.
+
+1.download file movies.csv  from CANVAS folder DATA
+2. read it into dataframe called   movies
+```{r}
+
+```
+
+3.  display a random sample of 10 rows
+```{r}
+
+```
+4.  Save all the Comedy movies using subset() into dataframe called comedies
+```{r}
+
+```
+5.  Write "comedies" into a file calles comediesYourLastname in your folder...
+```{r}
+
+```
+

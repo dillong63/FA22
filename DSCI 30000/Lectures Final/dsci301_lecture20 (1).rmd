@@ -1,0 +1,254 @@
+---
+title: "dsci301_lecture20"
+author: "Dr. Wojciech Golik"
+date: "Nov 05, 2020"
+output: html_document
+---
+
+
+#The tidy text format
+
+tidy data has a specific structure:
+
+Each variable is a column
+Each observation is a row
+Each type of observational unit is a table
+
+We thus define the tidy text format as being a table with one-token-per-row. 
+A token is a meaningful unit of text, such as a word, that we are interested in using for analysis.   
+Tokenization is the process of splitting text into tokens. 
+This one-token-per-row structure is in contrast to the ways text is often stored in current analyses, perhaps as strings or in a document-term matrix. 
+
+For tidy text mining, the token that is stored in each row is most often a single word, but can also be an n-gram, sentence, or paragraph. 
+In the tidytext package, we provide functionality to tokenize by commonly used units of text like these and convert to a one-term-per-row format.
+
+#Load Libraries we need
+```{r}
+library(tidyverse)   #needed for arrange(), etc...
+library("tibble")    # new package.  useful for text processing
+install.packages("tidytext")    # needed to tokenize...
+library(tidytext)
+```
+
+```{r}
+library(lubridate) #handles dates well
+```
+
+#We will use the material from https://www.tidytextmining.com/tidytext.html
+
+```{r}
+#quote from Emily Dickinson
+
+text <- c("Because I could not stop for Death -",
+          "He kindly stopped for me -",
+          "The Carriage held but just Ourselves -",
+          "and Immortality")
+
+# TEXT is a 4-element vector.  Each element of the vector is a string.
+text
+```
+
+```{r}
+#read   https://tibble.tidyverse.org/
+text_df <- tibble(line = 1:4, text = text)
+#note that "text=text" in the above  means that 
+#we create a column called "text"  with values from a vector called "text"
+
+
+#text_df is a dataframe with 4 rows and 1 column
+text_df
+
+```
+
+
+
+```{r}
+
+#Let's tokenize -  break the text into individual tokens.
+# we use unnest_tokens() function.  SEARCh for unnest_tokens()
+#This function is from the tidytext .   
+
+UnnestedEmilyQuote <-  unnest_tokens(text_df, output = word, input = text)
+UnnestedEmilyQuote
+
+# Note that text_df above has a column called TEXT that contains the data of interest.
+# default is lower case letters, to change this set to_lower = FALSE
+```
+
+```{r}
+#using count() and arrange() to count WORDS in UnnestedEmilyQuote:
+
+UnnestedEmilyQuote %>% count(word) %>% arrange(desc(n))
+```
+
+
+
+
+
+
+
+
+#Another Example (from 2016)
+```{r}
+install.packages("dslabs")
+library(dslabs)   #contains 26 interesting datasets including "trump_tweets"
+data("trump_tweets")
+```
+
+```{r}
+
+data()    #scroll down the R data sets to find the contents of "DSLABS" package
+```
+
+```{r}
+#Trump tweets between 2009 and 2017
+
+head(trump_tweets)
+str(trump_tweets)
+```
+
+
+```{r}
+#Example
+trump_tweets$text[1641]
+trump_tweets$text[765]
+```
+
+
+```{r}
+#using count() and arrange() to organize the tweets:
+#count(trump_tweets, source)
+trump_tweets %>% count(source) %>% arrange(desc(n))
+```
+
+
+
+```{r}
+#we will focus on what was tweeted between the day Trump announced his campaign and election day
+campaign_tweets <- trump_tweets %>% 
+  extract(source, "source", "Twitter for (.*)") %>%
+  filter(source %in% c("Android", "iPhone") & 
+           created_at >= ymd("2015-06-17") & 
+           created_at < ymd("2016-11-08")) %>%
+  filter(!is_retweet) %>%     arrange(created_at)
+
+str(campaign_tweets)
+sample_n(campaign_tweets, 10)
+```
+
+
+```{r}
+#Example.   Use SEARCH on unnest_tokens()  and pull()
+campaign_tweets[7,]
+campaign_tweets[7,] %>% 
+  unnest_tokens(word, text) %>%
+  pull(word) 
+```
+
+#stop words (Often there are words that are frequent but provide little information. These are called stop words, and you may want to remove them from your analysis. Some common English stop words include "I", "she'll", "the", etc.)
+```{r}
+#we unnest all words from campaign_tweets
+#what are the most commonly used words
+campaign_tweets %>% 
+  unnest_tokens(word, text, token = "tweets") %>% 
+  count(word) %>%
+  arrange(desc(n))
+```
+
+```{r}
+
+#English stop words from three lexicons, as a data frame. The snowball and SMART sets are pulled from the tm package. Note that words with non-ASCII characters have been removed.
+#see  https://www.rdocumentation.org/packages/tidytext/versions/0.2.6/topics/stop_words
+
+#stop_words             Various lexicons for English stop words from library(tidytext)
+stop_words
+sample_n(stop_words, 10)
+str(stop_words)
+```
+
+```{r}
+#filter out rows representing stop words
+
+ tweet_words <- campaign_tweets %>% 
+  unnest_tokens(word, text, token = "tweets") %>%
+  filter(!word %in% stop_words$word ) 
+
+tweet_words
+```
+
+
+```{r}
+#we end up with a much more informative set of top 10 tweeted words
+tweet_words %>% 
+  count(word) %>%
+  top_n(20, n) %>%
+  mutate(word = reorder(word, n)) %>%
+  arrange(desc(n))
+```
+
+
+```{r}
+# We can visualize this with
+#top 10 most common words
+
+#SEARCH forantijoin()    
+
+tweet_words %>%
+        anti_join(stop_words) %>%
+        count(word, sort = TRUE) %>%
+        top_n(10) %>%
+        ggplot(aes(x = reorder(word, n), y = n)) +
+         geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(x = "Words")
+
+```
+
+
+
+
+
+#Next Class
+
+We can now use data visualization to explore the possibility that two different groups were tweeting from these devices. For each tweet, we will extract the hour, East Coast time (EST), it was tweeted and then compute the proportion of tweets tweeted at each hour for each device:
+
+
+
+
+```{r}
+ds_theme_set()
+campaign_tweets %>%
+  mutate(hour = hour(with_tz(created_at, "EST"))) %>%
+  count(source, hour) %>%
+  group_by(source) %>%
+  mutate(percent = n / sum(n)) %>%
+  ungroup %>%
+  ggplot(aes(hour, percent, color = source)) +
+  geom_line() +
+  geom_point() +
+  labs(x = "Hour of day (EST)", y = "% of tweets", color = "")
+
+
+#explain what hour(with_tz(created_at, "EST")) 
+# mutate(percent = n / sum(n))   do...
+
+df <-campaign_tweets %>%
+  mutate(hour = hour(with_tz(created_at, "EST")))  %>%
+  count(source, hour) %>%
+  mutate(percent = n / sum(n))
+sample_n(df, 10)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

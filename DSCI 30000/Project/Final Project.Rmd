@@ -1,0 +1,39 @@
+---
+title: "Final_Project_Dillon"
+author: "Dillon Geary"
+date: "2022-11-14"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+coffee<-read.csv("coffee.csv")
+head(coffee)
+```
+```{r}
+ggplot(data = coffee, mapping = aes(x = species))+
+  geom_bar() + xlab("Species of Beans")+ ylab("Amount of Beans Tested")+ggtitle("Beans tested from different Species")
+
+```
+
+
+```{r}
+ggplot(coffee) +
+geom_histogram(mapping = aes(x = total_cup_points), binwidth = 0.2)+ xlab("Total Cup Points")+ ylab("Count of rated beans") + ggtitle("Distrubution of ratings for different beans")
+```
+
+
+
+```{r}
+ggplot(data = coffee, aes(x = altitude, y = total_cup_points)) +
+  geom_point()+ xlab("Altitude")+ ylab("Total Cup Points")+ggtitle("Altitudes affect on the cup rating")
+```
+```{r}
+ggplot(data = coffee, aes(x = country_of_origin , y = total_cup_points)) +
+  geom_point() + xlab("Bean Origin")+ ylab("Total Cup Points")+ggtitle("Country of origins affect on cup")
+```
+
+```{r}
+ggplot(data = coffee, aes(x = species , y = total_cup_points)) +
+  geom_boxplot()+coord_flip()+ xlab("Total Cup Points")+ ylab("Species")+ggtitle("Species VS Total Cup Points")
+```

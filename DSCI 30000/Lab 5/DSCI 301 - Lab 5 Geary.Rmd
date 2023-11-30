@@ -1,0 +1,40 @@
+---
+title: "DSCI 301 - Lab 5"
+author: "Dillon Geary"
+date: "2022-09-20"
+output: word_document
+---
+
+1. Use the head() function to get to top few rows of the mpg dataset.
+Recall that you have to load   library(tidyverse) to have access to mpg.  
+
+```{r}
+library(tidyverse)
+head(mpg)
+
+```
+2. For the mpg data set, plot a scatterplot for displ by hwy.
+
+```{r}
+c <- ggplot( data=mpg, mapping = aes( x=displ, y=hwy))
+
+c+ geom_point()
+
+```
+
+3. Facet by class with two rows.
+```{r}
+c+ geom_point()+ facet_wrap(vars(class),nrow =2)
+```
+    
+4. Facet by class and cyl
+```{r}
+c+ geom_point()+ facet_wrap(vars(class,cyl),nrow =2)
+```
+
+
+5. From your plot in #4, give any three observations.
+
+* Cars with lower displacement generally get better mpg on a highway
+* SUV and Pickups with 8  cylinders tend to have the highest displacement and concurrently the lowest mpg on a highway
+* Most cars with similiar displacement less than 3 get the same mpg on a highway on average.

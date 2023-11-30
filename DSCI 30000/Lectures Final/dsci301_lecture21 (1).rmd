@@ -1,0 +1,345 @@
+---
+title: "dsci301_lecture21"
+author: "Dr. Wojciech Golik"
+date: "Nov 10, 2021"
+output: html_document
+---
+#Sources:   
+https://rpubs.com/glennwithtwons/trump_tweets
+https://rdrr.io/cran/dslabs/man/trump_tweets.html
+
+
+#Last Time we talked about the tidy text format
+
+tidy data has a specific structure:
+
+Each variable is a column
+Each observation is a row
+Each type of observational unit is a table
+
+We thus define the tidy text format as being a table with one-token-per-row. A token is a meaningful unit of text, such as a word, that we are interested in using for analysis, and tokenization is the process of splitting text into tokens. This one-token-per-row structure is in contrast to the ways text is often stored in current analyses, perhaps as strings or in a document-term matrix. For tidy text mining, the token that is stored in each row is most often a single word, but can also be an n-gram, sentence, or paragraph. In the tidytext package, we provide functionality to tokenize by commonly used units of text like these and convert to a one-term-per-row format.
+
+#Load Libraries we need
+```{r}
+library(tidyverse)
+tidyverse_packages(include_self = TRUE)
+library(tidytext)
+#library(lubridate):    Lubridate provides tools that make it easier to parse and manipulate dates. 
+library(lubridate)
+```
+
+
+
+```{r}
+install.packages("dslabs")
+library(dslabs)
+data("trump_tweets")
+```
+
+```{r}
+
+data()
+```
+
+```{r}
+#Trump tweets between 2009 and 2017
+
+head(trump_tweets)
+str(trump_tweets)
+```
+
+
+```{r}
+#Example
+trump_tweets$text[6413]
+trump_tweets$text[17654]
+```
+
+
+```{r}
+#using count() and arrange() to organize the tweets:
+
+trump_tweets %>% count(source) %>% arrange(desc(n))
+```
+
+
+
+```{r}
+#we will focus on what was tweeted between the day Trump announced his campaign and election day
+campaign_tweets <- trump_tweets %>% 
+   filter(source %in% c("Twitter for Android", "Twitter for iPhone") & 
+           created_at >= ymd("2015-06-17") & 
+           created_at < ymd("2016-11-08")) %>%
+  filter(!is_retweet) %>%     arrange(created_at)
+
+str(campaign_tweets)
+sample_n(campaign_tweets, 10)
+```
+
+
+```{r}
+#Example.   Use SEARCH on unnest_tokens()  and pull()
+campaign_tweets[7,]
+campaign_tweets[7,] %>% 
+  unnest_tokens(word, text) %>%
+  pull(word) 
+```
+
+#stop words (Often there are words that are frequent but provide little information. These are called stop words, and you may want to remove them from your analysis. Some common English stop words include "I", "she'll", "the", etc.)
+```{r}
+#we unnest all words from campaign_tweets
+#what are the most commonly used words
+campaign_tweets %>% 
+  unnest_tokens(word, text, token = "tweets") %>% 
+  count(word) %>%
+  arrange(desc(n))
+```
+
+```{r}
+
+#English stop words from three lexicons, as a data frame. The snowball and SMART sets are pulled from the tm package. Note that words with non-ASCII characters have been removed.
+#see  https://www.rdocumentation.org/packages/tidytext/versions/0.2.6/topics/stop_words
+
+#stop_words   Various lexicons for English stop words from library(tidytext)
+stop_words
+sample_n(stop_words, 10)
+str(stop_words)
+```
+
+```{r}
+#filter out rows representing stop words
+
+ tweet_words <- campaign_tweets %>% 
+  unnest_tokens(word, text, token = "tweets") %>%
+  filter(!word %in% stop_words$word ) 
+
+sample_n(tweet_words, 10)
+```
+
+
+```{r}
+#we end up with a much more informative set of top 10 tweeted words
+tweet_words %>% 
+  count(word)  %>%
+  top_n(10, n)  %>%
+  mutate(word = reorder(word, n))%>%
+  arrange(desc(n))
+```
+
+
+```{r}
+# We can visualize this with
+#top 10 most common words
+
+#SEARCH for  anti_join()    
+
+tweet_words %>%
+#        anti_join(stop_words) %>%
+        count(word, sort = TRUE) %>%
+        top_n(10) %>%
+        ggplot(aes(x = reorder(word, n), y = n)) +
+         geom_bar(stat = "identity") +
+         coord_flip() +
+         labs(x = "Words")
+
+```
+
+#Today's Class
+We can now use data visualization to explore the possibility that two different groups were tweeting from these devices. For each tweet, we will extract the hour, East Coast time (EST), it was tweeted and then compute the proportion of tweets tweeted at each hour for each device:
+
+Let's look at the campaign_tweets dataset again.
+
+```{r}
+sample_n(campaign_tweets, 10)
+```
+
+We can now use data visualization to explore the possibility that two different groups were tweeting from these devices. For each tweet, we will extract the hour, East Coast time (EST), it was tweeted and then compute the proportion of tweets tweeted at each hour for each device:
+
+
+
+
+```{r}
+ds_theme_set()
+campaign_tweets %>%
+  mutate(hour = hour(with_tz(created_at, "EST"))) %>%
+  count(source, hour) %>%
+  group_by(source) %>%
+  mutate(percent = n / sum(n)) %>%
+  ungroup %>%
+  ggplot(aes(hour, percent, color = source)) +
+  geom_line() +
+  geom_point() +
+  labs(x = "Hour of day (EST)", y = "% of tweets", color = "")
+
+
+# explain what hour(with_tz(created_at, "EST")) 
+# and   mutate(percent = n / sum(n))   do...
+
+df <-campaign_tweets %>%
+  mutate(hour = hour(with_tz(created_at, "EST")))  %>%
+  count(source, hour) %>%
+  mutate(percent = n / sum(n))
+sample_n(df, 10)
+```
+
+
+
+
+#Sentiment analysis
+Sentiment analysis (or opinion mining) uses natural language processing and machine learning to interpret and classify emotions in subjective data. Sentiment analysis is often used in business to detect sentiment in social data, gauge brand reputation, and understand customers.
+
+
+One way to analyze the sentiment of a text:
+  - To consider the text as a combination of its individual words and the sentiment content of the whole text as the sum of the sentiment content of the individual words. This isn’t the only way to approach sentiment analysis, but it is an often-used approach, and an approach that naturally takes advantage of the tidy tool ecosystem.
+
+
+
+
+```{r}
+install.packages("textdata")
+library(textdata)
+```
+
+```{r}
+#Check out the content of the textdata library
+
+# https://cran.r-project.org/web/packages/textdata/index.html
+# https://cran.r-project.org/web/packages/textdata/textdata.pdf
+
+
+```
+
+#Lexicons
+
+Note that these Lexicons have to be downloaded the first time you use them.
+We will use get_sentiments() to do that.
+https://www.rdocumentation.org/packages/tidytext/versions/0.3.2/topics/get_sentiments
+
+
+1. The bing lexicon
+  - divides words into positive and negative sentiments.
+
+```{r}
+# SEARCH get_sentiments()
+#lexicon_bing()
+lexbing <- get_sentiments("bing")
+str(lexbing)
+sample_n(lexbing, 10)
+```  
+
+
+```{r}
+#Check out the count of sentiment
+
+#lexicon_bing()
+lexbing %>%   count(sentiment)
+```
+
+
+2. The afinn lexicon 
+
+  - assigns a score between -5 and 5, with -5 the most negative and 5 the most positive. 
+
+```{r}
+lexafinn  <- get_sentiments("afinn")  
+str(lexafinn)
+sample_n(lexafinn, 10)
+```
+
+```{r}
+#Check out the count of value
+
+lexafinn %>%   count(value)
+```
+
+  
+3. The nrc lexicons
+positive, negative, anger, anticipation, disgust, fear, joy, sadness, surprise, and trust.
+
+```{r}
+lexnrc <- get_sentiments("nrc")
+sample_n(lexnrc, 10)
+```
+
+```{r}
+#Check out the count of sentiment
+lexnrc %>%   count(sentiment)
+```
+
+```{r}
+#Note that some words may have multiple sentiment
+#Eg. Filter the word love
+lexnrc %>% filter(word == "love")
+```
+
+
+4. The loughran lexicons
+
+ This lexicon labels words with six possible sentiments important in financial contexts: "negative", "positive", "litigious", "uncertainty", "constraining", or "superfluous".
+ 
+```{r}
+lexloughran  <- get_sentiments("loughran")
+lexloughran %>% count(sentiment)
+```
+
+
+
+#Example
+Recall tweet_words from last class.
+Let's analize the sentiment of each tweet, let's use the nrc lexicon.
+
+```{r}
+nrc <- get_sentiments("nrc") %>%
+  select(word, sentiment)
+nrc
+```
+
+
+
+```{r}
+#combine the words and sentiments using inner_join
+
+#SEARCH  inner_join
+
+tweet_words %>% inner_join(lexnrc, by = "word") %>% 
+  select(source, word, sentiment) 
+```
+
+Let's perform a quantitative analysis comparing Android and iPhone by comparing the sentiments of the tweets posted from each device.
+
+```{r}
+sentiment_counts <- tweet_words %>%
+  left_join(nrc, by = "word") %>%
+  count(source, sentiment) %>%
+  spread(source, n) %>%
+  mutate(sentiment = replace_na(sentiment, replace = "none"))
+
+sentiment_counts
+```
+For each sentiment, we can compute the odds of being in the device: proportion of words with sentiment versus proportion of words without, and then compute the odds ratio comparing the two devices.
+```{r}
+#let's give the columns of sentiment_counts shorter names...
+sentiment_counts <- rename(sentiment_counts, Android = "Twitter for Android", iPhone = "Twitter for iPhone")
+sentiment_counts
+```
+
+
+
+```{r}
+#note how we overwrote the columns Android and Iphone and added AndroidtoIphone.  
+#SEARCH  mutate()
+
+sentiment_counts %>%
+  mutate(Android = Android / sum(Android) , 
+         iPhone = iPhone / sum(iPhone), 
+         AndroidtoIphone = Android/iPhone)           %>%
+  arrange(desc(AndroidtoIphone))
+```
+
+
+
+
+
+#Lab  10
+Load Lab10 from the LABS directory on CANVAS and perform all the required steps in it...
+

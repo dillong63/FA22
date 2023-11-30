@@ -1,0 +1,208 @@
+---
+title: "dsci301_lecture13"
+author: "Dr. Wojciech Golik"
+date: "October 05,2022"
+output: html_document
+---
+
+
+Objectives:
+
+At the end of the lesson, students will be able to:
+
+ * use pipe operator  %>%    to summarize datasets.
+ * Use group_by to summarize data.
+ 
+
+```{r}
+library(tidyverse)
+```
+
+#Pipe Operator %>%
+
+The pipe operator will allow you to avoid either a long nested operation or doing a bunch of assignments.
+Numeric example.
+```{r}
+#Perform the operation below
+
+sin(log(sqrt(sum(c(1, 2, 3, 4) ^ 2))))
+
+```
+
+```{r}
+c(1, 2, 3, 4) ^ 2 %>% 
+  sum %>% 
+  sqrt %>% 
+  log %>% 
+  sin
+```
+
+x %>% f(y) turns into: f(x, y)
+
+x %>% f(y) %>% g(z) turns into: g(f(x, y), z)
+
+
+Example
+```{r}
+df <- mtcars
+
+```
+
+```{r}
+#Filter mpg > 20
+#take a random sample of five observations. 
+
+arrange(sample_n(filter(df,mpg > 20),size=5),desc(mpg))
+
+```
+
+
+```{r}
+df %>% 
+  filter(mpg > 20) %>% 
+  sample_n(size = 5) %>% 
+  arrange(desc(mpg))
+
+```
+
+
+
+We have already discussed in LECTURE06  how to:
+
+1. Pick observations by their values: filter()
+
+2. Reorder the rows: arrange()
+
+3. Pick variables by their names: select()
+
+4. Create new variables with functions of existing variables: mutate()
+
+5. Collapse many values down to a single summary: summarise()
+
+
+All verbs work similarly:
+
+1. The first argument is a tibble (or data frame)
+
+2. The subsequent ones describe what to do, using the variable names
+
+3. The result is a new tibble
+
+
+```{r}
+library(nycflights13)
+flights
+
+```
+
+```{r}
+sample_n(flights, 10)
+```
+
+Example
+
+```{r}
+summarise(flights,
+          mean_distance = mean(distance, na.rm = TRUE),
+          mean_arr_delay = mean(arr_delay, na.rm = TRUE) )
+```
+
+
+# Group by
+
+group_by() takes an existing tbl and converts it into a grouped tbl where operations are performed "by group". ungroup() removes grouping.
+
+grouping doesn't change how the data looks.
+
+It changes how it acts with the other dplyr verbs (summarize, filter, etc.)
+
+```{r}
+mtcars
+by_cyl <- mtcars %>% group_by(cyl)
+by_cyl
+summarize(by_cyl,  mean_disp = mean(disp, na.rm = TRUE) )
+```
+
+
+More examples
+
+```{r}
+#For the flight data, group by year, month and day
+# then find the mean distance and mean arr_delay.
+flights
+flights %>% 
+  group_by(month, day) %>% 
+  summarise(mean_dist = mean(distance, na.rm = TRUE),
+            mean_arr_delay = mean(arr_delay, na.rm = TRUE)) 
+
+
+#what is going on here?  explain!
+flights %>% 
+  group_by(month) %>% 
+  summarise(mean_dist = mean(distance, na.rm = TRUE),
+            mean_arr_delay = mean(arr_delay, na.rm = TRUE)) 
+
+```
+
+
+
+
+
+```{r}
+#For the flight data, group by destination
+#then find Count the number of occurrences using n(), mean distance and mean arr_delay.
+#filter those with count > 200 and destination is not HNL.
+
+flights %>% 
+  group_by(dest) %>% 
+  summarise(count = n(),
+            mean_dist = mean(distance, na.rm = TRUE),
+            mean_arr_delay = mean(arr_delay, na.rm = TRUE)) %>% 
+  filter(count > 200, dest != "HNL")
+  
+
+  
+
+```
+
+
+```{r}
+#For the above example, plot a scatterplot mean_dist by mean_arr_delay.
+# Add a smoothline and turn off the se.
+# What can be inferred from the plot?
+
+flights %>% 
+  group_by(dest) %>% 
+  summarise(count = n(),
+            mean_dist = mean(distance, na.rm = TRUE),
+            mean_arr_delay = mean(arr_delay, na.rm = TRUE)) %>% 
+  filter(count > 200, dest != "HNL") %>% 
+  ggplot(mapping = aes(x = mean_dist, y = mean_arr_delay)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+
+
+```
+
+
+Exercise:
+
+1.  Use the pipe operator to do the following.  Take the dataframe flights.
+Filter it with the distance>1500 miles.
+Group it by origin.  Count the number of longer than 1500 miles flights  from each airport.
+
+```{r}
+
+
+
+
+```
+
+2.  Use the pipe operator to do the following.  Take the dataframe flights.
+Filter it with the arr_delay>30 minutes.
+Group it by carrier.  Count the number of flights with arr_delay>30 minutes by carrier.  
+
+
+
+
+

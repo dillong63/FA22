@@ -1,0 +1,126 @@
+---
+title: "dsci301_lecture16"
+author: "Dr. Wojciech Golik"
+date: "October 24, 2022"
+output: html_document
+---
+
+Working with linear regression...
+
+
+```{r}
+install.packages("ISLR")
+library(ISLR)
+library(MASS)
+
+#to read more about the package MASS type MASS  in Packages in RStudio
+```
+
+
+```{r}
+#Check out the Boston data set
+#to read more about the data 
+head(Boston)
+dim(Boston)
+library("tidyverse")
+sample_n(Boston, 10)
+
+
+```
+
+to read more about lm()  type  "lm"  in  the SEARCH help
+
+```{r}
+# Fit a linear regression model
+#the variables are:   x  is medv, and  y  is  lstat
+mod1 <- lm(medv ~ lstat, data = Boston)
+mod1
+
+```
+
+
+```{r}
+#Check out the summary of your model
+summary(mod1)
+```
+
+```{r}
+#plot the points  medv  vs  lstat  with the linear regression 
+library(tidyverse)
+ggplot(mod1) + 
+  geom_point(mapping = aes(x = lstat, y=medv)) + 
+  geom_smooth(aes(x = lstat, y=medv),  method = "lm")
+
+
+```
+
+
+```{r}
+#Use the coef() to determine the coefficients
+coef(mod1)
+```
+
+
+```{r}
+#Use the confint() to determine the CONFIDENCE INTERVALS of the parameters
+confint(mod1, level=0.95)
+```
+
+```{r}
+
+
+plot(c(0, 40), c(0,50) )
+abline( a= 34.5538409,   b=-0.9500494) 
+
+abline( a=33.448457 ,   b=-1.026148)
+abline( a= 35.6592247,   b=-0.8739505 )
+
+
+```
+```{r}
+#we'll use geom_abline() to draw the lines form the confidence intervals...
+ggplot(mod1) + 
+  geom_point(mapping = aes(x = lstat, y=medv)) + 
+  geom_smooth(aes(x = lstat, y=medv),  method = "lm") +
+  geom_abline( aes( intercept = 33.448457, slope=-1.026148 ) , alpha=0.5 ) +
+  geom_abline( aes( intercept = 35.6592247, slope=-0.8739505 ) , alpha=0.5 )
+
+
+```
+
+```{r}
+#For lstat= c(5 , 10 ,15)), Use the predict() to determine predictions
+
+predict(mod1, data.frame(lstat= c(5 , 10 ,15)))
+
+```
+
+#By hand
+```{r}
+34.5538409 + -0.9500494 * 5
+34.5538409 + -0.9500494 * 10
+34.5538409 + -0.9500494 * 15
+```
+Find the observed values on the LM graph produced above...
+
+
+```{r}
+predict(mod1, data.frame(lstat= c(5 , 10 ,15)), interval='confidence')
+```
+_____________________________________________________
+Lab 9.   Download the file from the FILES/LABS.
+
+1.  Perform the LM analysis (as above ) on medv vs crim.
+
+Write down your insights of the relationship between medv and crim in terms understood by general public.
+
+
+2.  Perform the LM analysis (as above ) on indus vs crim.
+Write down your insights of the relationship between indus and crim in terms understood by general public.
+
+
+
+
+
+
+

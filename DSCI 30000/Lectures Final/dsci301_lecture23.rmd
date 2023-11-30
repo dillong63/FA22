@@ -1,0 +1,300 @@
+---
+title: "dsci301_lecture23"
+author: "Dr. Wojciech Golik"
+date: "Nov 21, 2022"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+#Shiny.  Get more info about shiny apps from the link below...
+https://mastering-shiny.org/basic-app.html
+
+
+Shiny is an R package that makes it easy to build interactive web applications (apps) straight from R.   You can host stand alone apps on a webpage or embed them in R Markdown documents or build dashboards. You can also extend your Shiny apps with CSS themes, htmlwidgets, and JavaScript actions.
+
+```{r}
+install.packages("shiny")
+```
+
+
+
+#1. Running an example from package SHINY
+https://shiny.rstudio.com/reference/shiny/1.6.0
+https://shiny.rstudio.com/reference/shiny/1.6.0/runExample.html
+
+```{r}
+library(shiny)
+runExample()
+```
+
+```{r}
+runExample("01_hello")
+#close the window with this example when ready to move on...
+```
+```{r}
+runExample("03_reactivity")
+#close the window with this example when ready to move on...
+```
+```{r}
+runExample("06_tabsets")
+#close the window with this example when ready to move on...
+```
+ 
+Shiny apps are contained in a single script called app.R  
+app.R has three components:
+  * (ui)  -- a user interface object.
+  * (server)  -- a server function.
+  * a call to the shinyApp function.
+
+
+```{r}
+ # Print the directory containing the code for all examples
+  system.file("examples", package="shiny")
+```
+
+
+
+#Note
+See the Shiny-Application-Layout-Guide for additional details on laying out fluid pages.
+
+
+```{r}
+
+library(shiny)
+
+# Define UI ----
+ui <- fluidPage(
+#  Functions for creating fluid page layouts. A fluid page layout consists of rows which in turn include columns. Rows exist for the purpose of making sure their elements appear on the same line (if the browser has adequate width). Columns exist for the purpose of defining how much horizontal space within a 12-unit wide grid it's elements should occupy. Fluid pages scale their components in realtime to fill all available browser width.
+
+  
+)
+
+# Define server logic ----
+server <- function(input, output) {
+  
+}
+
+# Run the app ----
+shinyApp(ui = ui, server = server)
+
+```
+Note that the HISTOGRAM EXAMPLE from above has run the following code.  
+Copy and paste it into the app.r function.  Then click "RunApp" which is on the top right page of app.r.
+
+```{r}
+# Define UI for app that draws a histogram ----
+ui <- fluidPage(
+
+  # App title ----
+  titlePanel("Hello Shiny!"),
+
+  # Sidebar layout with input and output definitions ----
+  sidebarLayout(
+
+    # Sidebar panel for inputs ----
+    sidebarPanel(
+
+      # Input: Slider for the number of bins ----
+      sliderInput(inputId = "bins",
+                  label = "Number of bins:",
+                  min = 1,
+                  max = 50,
+                  value = 30)
+
+    ),
+
+    # Main panel for displaying outputs ----
+    mainPanel(
+
+      # Output: Histogram ----
+      plotOutput(outputId = "distPlot")
+
+    )
+  )
+)
+
+# Define server logic required to draw a histogram ----
+server <- function(input, output) {
+
+  # Histogram of the Old Faithful Geyser Data ----
+  # with requested number of bins
+  # This expression that generates a histogram is wrapped in a call
+  # to renderPlot to indicate that:
+  #
+  # 1. It is "reactive" and therefore should be automatically
+  #    re-executed when inputs (input$bins) change
+  # 2. Its output type is a plot
+  output$distPlot <- renderPlot({
+
+    x    <- faithful$waiting
+    bins <- seq(min(x), max(x), length.out = input$bins + 1)
+
+    hist(x, breaks = bins, col = "#75AADB", border = "white",
+         xlab = "Waiting time to next eruption (in mins)",
+         main = "Histogram of waiting times")
+
+    })
+
+}
+
+# Create Shiny app ----
+shinyApp(ui = ui, server = server)
+```
+
+
+
+
+
+#2. Layout
+
+#Replace the above UI with the UI below and run app.
+```{r}
+ui <- fluidPage(
+  
+  titlePanel("title panel  HAHAHA"),
+
+  sidebarLayout(position = "right", #default is left.
+    sidebarPanel("sidebar panel  Blah, blah"),
+    mainPanel("main panel  HEHEHE")
+  )
+)
+
+# Define server logic ----
+server <- function(input, output) {
+  
+}
+
+# Run the app ----
+shinyApp(ui = ui, server = server)
+
+```
+
+#3 Formatted text
+
+#Run the code below, notice the formatting.
+```{r}
+ui <- fluidPage(
+  titlePanel("My Shiny App"),
+  sidebarLayout(
+    sidebarPanel(),
+    mainPanel(
+      p("p creates a paragraph of text."),
+      
+      p("A new p() command starts a new paragraph. Supply a style attribute to change the format of the entire paragraph.", style = "font-family: 'calibri'; font-si16pt"),
+      
+      strong("strong() makes bold text."),
+      
+      em("em() creates italicized (i.e, emphasized) text."),
+      
+      br(),    #THIS IS A BLANK LINE
+      
+      code("code displays your text similar to computer code"),
+      
+      div("div creates segments of text with a similar style. This division of text is all blue because I passed the argument 'style = color:blue' to div", style = "color:blue"),
+      br(),
+      
+      p("span does the same thing as div, but it works with",
+        span("groups of words", style = "color:blue"),
+        "that appear inside a paragraph.")
+    )
+  )
+)
+
+# Define server logic ----
+server <- function(input, output) {
+  
+}
+
+# Run the app ----
+shinyApp(ui = ui, server = server)
+```
+
+
+#4. Images
+
+
+#To create a new app in RStudio:
+Create a new directory and an app.R file containing a basic app in one step by clicking File | New Project, then selecting New Directory and Shiny Web Application.
+
+#Copy the code below and paste it in the app.r function. Then click "RunApp" which is on the top right page of app.r
+
+
+argument: img(src = "my_image.png"), you may need to adjust height and width to fit your purpose.
+Your image file must be in a folder named www in the same directory as the app.R script.  Notice how an image was inserted.
+
+```{r}
+library(shiny)
+
+# Define UI ----
+ui <- fluidPage(
+  titlePanel("Data Science at Lindenwood University"),
+  sidebarLayout(
+    sidebarPanel(
+      h2("Project-Based Learning"),
+      p("This multidisciplinary program consists of 20 courses, covering business, mathematics and statistics, and computer skills:"),
+      code('install.packages("shiny")'),
+      br(),
+      br(),
+      br(),
+      br(),
+      img(src = "LIND_Logo_InterlockLU_Primary_GLD-01.png", height = 100, width = 100)    #LU_logo
+    ),
+    
+    
+    mainPanel(
+      h1("What is Data Science?"),
+      p("Data Science is an interdisciplinary field that lies at the intersection of",
+        em("Mathematics, Statistics, and Computer Science."),
+        "Data Scientists use their analytical, statistical, and technological skill to extract meaning and insight from data. They use data to construct statistical models that help them to explain certain phenomena, and to make predictions"),
+      br(),
+      
+      
+      p("For more information, visit ",
+        a("Data Science.", 
+          href = "https://www.lindenwood.edu/academics/academic-schools/school-of-sciences/mathematics/data-science/")),
+      br(),
+      h2("Resources for Learning Data Science"),
+      p("- Intro to R."),
+      p("- Intro to",
+        strong("Python")
+      )
+    )
+  )
+)
+
+# Define server logic ----
+server <- function(input, output) {
+  
+}
+
+# Run the app ----
+shinyApp(ui = ui, server = server)
+```
+
+
+
+#Now,  Let's practise...
+
+1.  Create a shiny app, which displays a interactive histogram of critics_score 
+from the file     movies.csv
+a) write s hort code chunk to read   movies.csv into dataframe MOVIES
+b) modify the code chunk for the interactive histogram from Lecture23 
+to use data in MOVIES$critics_score to draw the new histogram
+c) change all the labels in your app to reflect the new data...
+
+```{r}
+#reading movies.csv into dataframe MOVIES
+library(tidyverse)
+
+```
+
+
+```{r}
+library(shiny)
+
+
+```
+
+

@@ -1,0 +1,89 @@
+---
+title: "dsci301_lecture19"
+author: "Dr. Wojciech Golik"
+date: "Nov 09, 2022"
+output: html_document
+---
+
+
+#Interaction
+
+An interaction occurs when an independent variable has a different effect on the outcome depending on the values of another independent variable.  For example, one variable, x1 might have a different effect on y within different categories or groups given by variable x2.
+
+Syntax:
+
+With lm, an asterisk in the formula generates the interaction terms.
+
+```{r}
+#use SEARCH to learn more about state.x77
+df <- data.frame(state.x77)
+
+df
+```
+Compare 
+```{r}
+
+mod1 <- lm(Income ~ HS.Grad + Illiteracy + Murder, data = df)
+
+summary(mod1)
+
+```
+
+
+Predict: HS.Grad = 13,  Illiteracy = 1.5, Murder = 14; can you verify this by hand calculation?
+
+we got the following equation:
+Income = 2017.96 + 45.19*13 - 176.84*1.5 + 30.48*14 
+
+
+
+```{r}
+#evaluating INCOME using PREDICT()
+predict(mod1, data.frame(HS.Grad = 13, Illiteracy = 1.5, Murder = 14 ))
+
+#using the formula explicitly:
+2017.96 + 45.19*13 - 176.84*1.5 + 30.48*14
+```
+
+
+
+```{r}
+#Fit Income using HS.Grad, Illiteracy, Murder, and interaction of Illiteracy & Murder
+
+mod2 <- lm(Income ~ HS.Grad + Illiteracy*Murder, data = df)
+
+summary(mod2)
+```
+
+
+1. Interpret result
+
+we got the following equation:
+Income = 1414.46 + 40.76*13 + 753.07*1.5 + 130.60*14 - 97.04*1.5*14
+Note that the interaction between Illiteracy*Murder resulted in the last term!!
+
+2. Predict: HS.Grad = 13, Illiteracy = 1.5, Murder = 14,  can you verify this by hand calculation?
+Of course - just plug in the numbers in the formulas above!!
+
+```{r}
+predict(mod2, data.frame(  HS.Grad = 13,  Illiteracy = 1.5, Murder = 14))
+
+#using the formula directly...
+1414.46 + 40.76*13 + 753.07*1.5 + 130.60*14 - 97.04*1.5*14
+```
+
+
+#Limitation Of Linear Regression
+
+1. the LM models should not be used for EXTRAPOLATION (i.e., outside the data range). 
+
+2. Don't use the LM when target variable is binary. The restriction to 0 and 1 response does not fit the normal distribution.
+
+3. Linear models are sensitive to outliers.
+
+4. They don't perform well with nonlinear relationships, though there may be a data transformation that can produce linearity.
+
+
+#Now,  download  lab9  from the folder  LABS  and complete it in class... 
+
+

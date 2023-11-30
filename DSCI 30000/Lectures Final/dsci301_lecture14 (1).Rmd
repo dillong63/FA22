@@ -1,0 +1,202 @@
+---
+title: "dsci301_lecture14"
+author: "Dr. Wojciech Golik"
+date: "October 17, 2022"
+output: html_document
+---
+
+
+#Exploratory Data Analysis (EDA)
+
+```{r}
+library(tidyverse)
+```
+
+Objectives
+  
+  * Be able to explore data in a systematic way using visualization and transformation.
+  
+
+EDA is an iterative process:
+
+  1. Generate questions about your data.
+
+  2. Search for answers by visualizing, transforming, and modeling data.
+
+  3. Use what you learn to refine your questions or generate new ones.
+
+Some comments about EDA:
+
+  1. It is not a formal process with a strict set of rules.
+
+  2. Explore many ideas: some will pan out, others will be dead ends.
+
+  3. Even if questions are predefined, quality of data still needs to be assessed.
+
+
+Ask Ask Ask questions
+
+Two types of questions may be generally useful:
+  
+  1. What type of variation occurs within the variables?
+  
+  2. What type of covariation occurs between the variables?
+
+
+# Visualizing variation
+
+Let's look at the dataframe  DIAMONDS (from  ggplot)
+```{r}
+library("tidyverse")
+
+max(diamonds$price)
+
+
+sample_n(diamonds, 10)
+
+filter(diamonds, price>18600)
+
+
+
+```
+
+
+
+
+1. For categorical variables:  BAR GRAPHS
+
+```{r}
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut))
+```
+
+In both bar charts and histograms, tall bars show the more popular values of a variable, and shorter bars show less popular values. Places that do not have bars reveal values that were not seen in your data. To turn this information into useful questions, look for anything unexpected:
+
+  1. Which values are the most common? Why?
+
+  2. Which values are rare? Why? Does that match your expectations?
+
+  3. Can you see any unusual patterns? What might explain them?
+
+
+
+2. For continuous variables:  HISTROGRAMS
+
+```{r}
+#experiment with different binwidth:  0.01,  0.1, 0.2,  etc.
+
+ggplot(data = diamonds) +
+geom_histogram(mapping = aes(x = carat), binwidth = 0.2)
+
+```
+
+DOCUMENTATION on Dataframes
+
+```{r}
+?diamonds
+```
+
+
+#Identifying unusual values
+
+Outliers are unusual observations: points that don’t seem to fit the pattern.
+
+Sometimes outliers are entry errors; at other times they can be interesting.
+
+
+```{r}
+ggplot(diamonds) + 
+  geom_histogram(mapping = aes(x = y), binwidth = 0.5) 
+```
+
+
+Outliers are sometimes difficult to see in a histogram....   
+THere are some outliers in the above histrogram with large values of y.
+
+How to see them?  
+  
+Solution: zoom in on the vertical axis.
+
+
+```{r}
+ggplot(diamonds) + 
+  geom_histogram(mapping = aes(x = y), binwidth = 0.5) +
+  coord_cartesian(ylim = c(0, 100))
+```
+or we can use  FILTER()
+```{r}
+#Filter the variable y
+diamonds %>% 
+  filter(y < 1 | y > 15) %>% 
+  arrange(y)
+
+  
+```
+
+Can we have a diamond with a zero width?
+
+What do you think of the diamonds with y = 31.8 and 58.9?
+
+
+It’s good practice to repeat your analysis with and without the outliers.
+
+
+
+Exercise
+______________
+
+Explore the distribution of each of the x, y, and z variables in diamonds. What do you learn? Think about a diamond and how you might decide which dimension is the length, width, and depth.
+
+Hint:
+
+calculate summary statistics for these variables and plot their distributions.
+
+here is the histogram for variable x
+```{r}
+ggplot(diamonds) + 
+  geom_histogram(mapping = aes(x = x), binwidth = 0.5) +
+  coord_cartesian(ylim = c(0, 100))
+```
+Any data entry errors? Any hypothesis for this?
+Yes,   it seems that there are some diamonds with x=0 which is nonsense...
+Let's print them out...
+```{r}
+#Filter the variable x
+diamonds %>% 
+  filter(x < 1 | x > 10) %>% 
+  arrange(x)
+```
+
+Are there any outliers?
+The values of x equal to about 10 seem to be OK.    The values with with x=0 are obviously wrong...
+
+now -  do the same for  y  and z....
+
+
+Histogram of  x  is skewed.   Is it appropriate?   See below and provide your opinion...
+
+```{r}
+ggplot(diamonds) + 
+  geom_histogram(mapping = aes(x = x), binwidth = 0.5)
+```
+
+What about values compared to other variables?
+For example, find how is the diamond size related to value?
+```{r}
+
+```
+
+
+Is the DEPTH of a diamond correlated with its PRICE??
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,96 @@
+---
+title: "Final_Project_DG"
+author: "Dillon Geary"
+date: "2022-11-16"
+output: word_document
+---
+
+# Introduction
+
+## About the dataset
+The data I will be using is from a data set called coffee which I got from github. This data set has rating on different beans which have different attributes associated to them. The data was last updated in 2021.A lot of the data held in the data set is not very useful, such as amount of bags made etc. Therefore, the data I will use is listed below.
+
+## Data used for analysis
+* Total Cup Points
+* Species
+* Region
+* Country
+* Altitude
+
+Using this data I will make deductions how each variable has an affect on the other, if any.
+
+# Table of Data
+```{r}
+library(ggplot2)
+coffee<-read.csv("coffee.csv")
+head(coffee)
+mod1 <- lm(total_cup_points~aroma+body+category_two_defects+moisture+altitude_mean_meters,data=coffee)
+```
+
+
+
+
+# First Plot
+```{r}
+ggplot(data = coffee, mapping = aes(x = species,fill=country_of_origin))+
+  geom_bar() + xlab("Species of Beans")+ ylab("Amount of Beans Tested")+ggtitle("Beans tested from different Species")
+
+```
+The above bar graph shows that most of the beans that were tested come from the Arabica species. This might be because most beans in the world are the Arabica type or is the preferred one for consumers and that's why there is more of it.
+
+# Second Plot
+```{r}
+ggplot(coffee) +
+geom_histogram(mapping = aes(x = total_cup_points), binwidth = .5,color='Blue')+ xlab("Total Cup Points")+ ylab("Count of rated beans") + ggtitle("Distrubution of ratings for different beans") +xlim(50,100)
+```
+Many of the cups score a total cup point above 75% this shows that most of the beans which were tested are of good quality. Thus, the average bean would still brew a good cup of coffee. It can be said that different beans therefore don't have a huge affect on its rating.
+
+# Third plot
+```{r}
+ggplot(mod1) + 
+  geom_point(mapping = aes(x = altitude_mean_meters , y=total_cup_points)) + 
+  geom_smooth(aes(x = altitude_mean_meters, y=total_cup_points))+xlim(0,3000)
+```
+In the above graph you can see that the altitude does not have an affect on the total cup rating as the distribution for all altitudes. Therefore, it can be said that there is an other variable that has an affect on the total cup points.
+# Fourth Plot
+```{r}
+ggplot(data = coffee, aes(x = total_cup_points , y = country_of_origin)) +
+  geom_point(color='red') + xlab("Total Cup Points")+ ylab("Bean Origin")+ggtitle("Bean Origin VS Total Cup Points")
+```
+The country that the beans are grown in also does not seem to have an effect on the total cup. The outlier from Honduras, is probably just a bag which was bad quality from the maker as it is rated far lower than the rest from the same country of origin. 
+# Fifth Plot
+```{r}
+ggplot(data = coffee, aes(x = species , y = total_cup_points)) +
+  geom_boxplot(color='red')+ xlab("Total Cup Points")+ ylab("Species")+ggtitle("Species VS Total Cup Points")+coord_cartesian(ylim=c(60,95)) 
+```
+The Arabica beans are rated more highly than the Robusta beans. This could be due to many factor such as judges taste or the amount of beans tested from each species. It is more likely that the Arabica beans are just better because they have been more refined due to their being more of them compared to the Robusta as seen in plot 1.
+
+```{r}
+ggplot(mod1) + 
+  geom_point(mapping = aes(x = aroma , y=total_cup_points)) + 
+  geom_smooth(aes(x = aroma, y=total_cup_points),  method = "lm")+xlab("Aroma")+ ylab("Total Cup Points")+ggtitle("Aromas affect of rating")
+```
+As the aroma score increases there is a trend for a increase in the total cup points. This shows that the aroma is important for a good cup of coffee.
+
+```{r}
+ggplot(mod1) + 
+  geom_point(mapping = aes(x = body , y=total_cup_points)) + 
+  geom_smooth(aes(x = body, y=total_cup_points),  method = "lm")+xlab("Body")+ ylab("Total Cup Points")+ggtitle("Body affect of rating")
+```
+
+
+```{r}
+ggplot(mod1) + 
+  geom_point(mapping = aes(x = moisture , y=total_cup_points)) + 
+  geom_smooth(aes(x = moisture, y=total_cup_points),  method = "lm")+xlab("Moisture")+ ylab("Total Cup Points")+ggtitle("Moisture affect of rating")
+```
+
+The more moisture the beans has the worst the rating for a cup goes down. This could be that the moisture in the beans has a affect on the taste.
+
+```{r}
+ggplot(mod1) + 
+  geom_point(mapping = aes(x = category_two_defects , y=total_cup_points)) + 
+  geom_smooth(aes(x = category_two_defects, y=total_cup_points),  method = "lm")+xlab("Defects")+ ylab("Total Cup Points")+ggtitle("Defects affect of rating")
+```
+
+The more defects there are in the beans the worse the rating.

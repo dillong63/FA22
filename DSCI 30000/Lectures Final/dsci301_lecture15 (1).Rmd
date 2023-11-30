@@ -1,0 +1,115 @@
+---
+title: "dsci301_lecture15"
+author: "Wojciech Golik"
+date:     "October 19, 2022"
+output: html_document
+---
+
+#Exploratory Data Analysis (EDA)
+DATAFRAME:    DIAMONDS
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+dim(diamonds)
+head(diamonds)
+
+```
+
+
+
+
+What variable in the diamonds dataset is most important for predicting the price of a diamond? 
+we will study the following:
+Price vs Carat
+Price vs Color
+Price vs Clarity
+Price vs Cut
+
+
+
+1.   First:   Price vs Carat
+```{r}
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+  geom_point() + geom_smooth()
+```
+Generally, the heavier the diamond the more expensive it is.  
+However, there are many exceptions to the general trend.   
+For example, the are diamonds with carat=1, 1.5, and 3
+with prices varying immensely in each weight category...
+Other factors influence the price beyond the weight...
+
+
+
+2.  Now,   Price vs Color
+```{r}
+ggplot(data = diamonds, aes(x = color, y = price)) +
+  geom_boxplot()
+```
+The COLOR is coded by letters D-J.  
+We note here that the Price median increases with the value of the COLOR letter.   
+So do the 1st and 3rd quartiles...
+That makes sense...  
+
+
+
+3.   Now,  Price vs Clarity
+
+```{r}
+ggplot(data = diamonds, aes(x =  clarity, y = price) ) +
+  geom_boxplot()
+```
+On the face of it this is a strange correlation.   
+The clearer the diamond the less valuable it becomes...  
+Look at the medians...  
+How do you explain that??
+
+
+4. How is price correlated with cut? 
+Now    PRICE  vs  CUT
+```{r}
+ggplot(data = diamonds, aes(x = cut, y = price)) +
+  geom_boxplot()
+```
+Why is the IDEAL cut diamonds less valuable than the ones of any other cut????
+
+
+
+
+5.   What is the relationship between carat and cut? 
+
+```{r}
+ggplot(data = diamonds, aes(x = cut, y = carat)) +
+  geom_boxplot()
+```
+What does this relationship between CARAT and CUT  tells us 
+about diamonds of lower quality cut being more expensive?
+
+The FAIR cut diamonds are generally larger than the IDEAL cut diamonds.  
+That's why (on average) the FAIR diamonds costs more than IDEAL diamonds...
+The size (or weight) of diamond is more important that the quality of the cut.
+
+_____________________________________________________________________________________
+Exercise.
+6.  So what if we compare diamonds in this dataframe of similar weight?
+Would the IDEAL diamonds be generally more expensive than the FAIR ones? 
+Filter the dataframe DIAMONDS to keep only diamonds with, say, 1.0<= CARAT <=1.5. 
+Then do the boxplot of PRICE vs CUT.  What do you see?
+Repeat the experiment for other ranges of variable CARAT.
+
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
